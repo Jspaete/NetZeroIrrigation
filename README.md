@@ -1,4 +1,7 @@
-Data Preprosessing for Master Thesis of Jara Späte
+Data Preprosessing 
+## ZEN Garden Inputs
+Datasets for running all scenarios in Zen-Garden in Zip file: zen_garden_inputs.zip
+
 ## Water Pump Conversion & Availability Module
 
 ### 1. What this module does
