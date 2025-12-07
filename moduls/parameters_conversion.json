@@ -1,0 +1,12 @@
+{
+    "eff_diesel": 0.3,
+    "eff_el": 0.8,
+    "H": {
+        "surface": {"value": 0.41, "unit": "bar"},
+        "drip": {"value": 1, "unit": "bar"},
+        "sprinkler": {"value": 3, "unit": "bar"},
+        "from_surface_water": {"value": 0, "unit": "bar"}
+    },
+    "f_losses": {"value": 0.69, "unit": "bar"},
+    "numeric_factor": 367
+}
