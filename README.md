@@ -2,13 +2,15 @@
 The following code allows to process various data inputs to the format that is needed to run the optimization model Zen-Garden [1]. The final computed datasets can be found in Zen-Garden zen_garden_inputs.zip
 For the optimization model Zen-Garden, please use their open access code directly.
 
+## 1. Dataset of each figure
+Full data for each figure is available in inputs_outputs.xlsx.
 
-## 1. Irrigation Water Demand Processing Module (Rosa & Driscoll)
+## 2. Irrigation Water Demand Processing Module (Rosa & Driscoll)
 
-### 1.1 What this module does
+### 2.1 What this module does
 This module processes gridded monthly irrigation water demand from NetCDF data and allocates it to U.S. counties. It combines this spatial distribution with annual county-level water use from Driscoll et al. (2024) [1] to derive consistent monthly and hourly water demand. Missing county data are filled using spatial neighbors. The output is a filtered, hourly water demand time series for high-consumption counties (p75). All results are exported in Nexus-e–compatible CSV formats.
 
-### 1.2. How to use it
+### 2.2. How to use it
 1. Ensure all input files and paths defined at the top of the script are available.  
 2. Make sure `create_county_US()` from `gdf_US` is accessible.  
 3. Run the script directly:
@@ -16,7 +18,7 @@ This module processes gridded monthly irrigation water demand from NetCDF data a
 python water_demand_data.py
 ```
 
-### 1.3. Inputs and Outputs
+### 2.3. Inputs and Outputs
 **Inputs**
 - Annual county water use (Driscoll et al. 2024, Excel):
 41467_2024_44920_MOESM4_ESM.xlsx [2]
@@ -47,19 +49,19 @@ demand_hourly_water_month_YYMMDD.csv
 ../final_outputs/carriers/water/demand.csv  
 
 
-## 2 Energy System Nodes & Edges Generator (US Counties)
+## 3 Energy System Nodes & Edges Generator (US Counties)
 
-### 2.1. What this module does
+### 3.1. What this module does
 This module creates the spatial structure of the U.S. energy system by generating nodes and edges from county geometries. Each U.S. county is converted into a model node with latitude and longitude. Neighboring counties are identified via shared boundaries to build the system edges. The outputs define the full spatial topology required by the energy system model.
 
-### 2.2. How to use it
+### 3.2. How to use it
 1. Ensure `create_county_US()` from `gdf_US` is available and returns a county GeoDataFrame.
 2. Run the script directly:
 ```bash
 python create_system_parameters.py
 ```
 
-### 2.3. Inputs and Outputs
+### 3.3. Inputs and Outputs
 **Inputs**
 - U.S. county geometries with node IDs:
 from create_county_US() [4]
@@ -73,12 +75,12 @@ from create_county_US() [4]
     - Columns: edge, node_from, node_to
 
 
-## 3 Water Pump Conversion & Availability Module
+## 4 Water Pump Conversion & Availability Module
 
-### 3.1. What this module does
+### 4.1. What this module does
 This module preprocesses U.S. county-level irrigation and groundwater data to compute conversion factors for electric and diesel water pumps. It derives irrigation system shares, groundwater well depth and pressure, pump energy source shares, and water availability. Based on these inputs, it calculates energy conversion factors (kWh/m³) and existing water pump capacities. All results are exported in Zen-Garden–compatible CSV formats.
 
-### 3.2. How to use it
+### 4.2. How to use it
 1. Ensure all required input files and folder paths defined at the top of the script exist.  
 2. Place `parameters_conversion.json` in the same directory as the script.  
 3. Run the script directly:
@@ -86,7 +88,7 @@ This module preprocesses U.S. county-level irrigation and groundwater data to co
 python water_pumps.py
 ```
 
-## 3.3. Inputs and Outputs
+## 4.3. Inputs and Outputs
 
 **Inputs**
 - Irrigation system data (Excel): irrigation_irrigated_area_county.xlsx [2]
@@ -112,19 +114,19 @@ python water_pumps.py
 
 
 
-## 4 Energy Carrier Data Processing Module (Prices & Carbon Intensity)
+## 5 Energy Carrier Data Processing Module (Prices & Carbon Intensity)
 
-### 4.1. What this module does
+### 5.1. What this module does
 This module processes U.S. electricity prices, diesel prices, and power-sector carbon intensity and maps them from state or regional level to county-level energy system nodes. It computes mean, 5th, and 95th percentile import prices for both electricity and diesel. Diesel prices are converted from \$/gallon to \$/kWh. All outputs are filtered to the p75 node set used in the energy system model and exported as CSV files.
 
-### 4.2. How to use it
+### 5.2. How to use it
 1. Ensure all input files and paths defined at the top of the script exist.
 2. Make sure `create_county_US()` and the state mapping utilities are available.
 3. Run the script directly:
 ```bash
 python process_energy_carriers.py
 ```
-### 4.3. Inputs and Outputs
+### 5.3. Inputs and Outputs
 **Inputs**
 - Diesel price time series (CSV):  
 Weekly_On-Highway_Diesel_Fuel_Prices_20240720.csv [8]
@@ -149,12 +151,12 @@ from create_county_US() [4]
     - price_import_min.csv (5th percentile)
 
 
-## 5 County-Level Solar PV Capacity Factor Processing Module
+## 6 County-Level Solar PV Capacity Factor Processing Module
 
-### 5.1. What this module does
+### 6.1. What this module does
 This module loads county-level solar PV capacity factor (CF) time series, applies timezone-based time shifts, and computes monthly–hourly mean CF profiles. Missing county CFs are filled using state-level means, with a dedicated fallback for WA and OR based on plant-level data. The output is a complete, consistent CF dataset for all filtered model nodes. Results are saved in a format compatible with the energy system model.
 
-### 5.2. How to use it
+### 6.2. How to use it
 1. Ensure all required CSV input files and folder paths exist as defined in the script.
 2. Make sure county geometries with `GEOID`, `node`, and time zones are available.
 3. Run the script directly:
@@ -162,7 +164,7 @@ This module loads county-level solar PV capacity factor (CF) time series, applie
 python process_solar_cf.py
 ```
 
-### 5.3. Inputs and Outputs
+### 6.3. Inputs and Outputs
 **Inputs**
 - Filtered model nodes:  
 ../final_outputs/energy_system/nodes_filtered_p75.csv
@@ -181,12 +183,12 @@ from create_county_US()
 - Final filled monthly–hourly CF per county:
 ../final_outputs/technologies/conversion/PV/cf_solar_PV.csv
 
-## 5. Helper function: U.S. State & County Geometry Loader Module
+## 7. Helper function: U.S. State & County Geometry Loader Module
 
-### 5.1. What this module does
+### 7.1. What this module does
 This module loads U.S. state and county shapefiles as GeoDataFrames for spatial analysis. It standardizes county identifiers into a `node` format based on FIPS codes. A utility function creates geographic bounding boxes. The outputs are ready-to-use geospatial datasets for energy system modeling and spatial allocation tasks.
 
-### 5.2. How to use it
+### 7.2. How to use it
 1. Ensure the U.S. state and county shapefiles exist at the paths defined in the script.
 2. Import and call the required function:
 ```python
@@ -195,7 +197,7 @@ from gdf_US import create_county_US, create_state_US
 us_counties = create_county_US()
 us_states = create_state_US()
 ```
-### 5.3. Inputs and Outputs
+### 7.3. Inputs and Outputs
 **Inputs**
 - U.S. state GeoJSON:  
 ../data_inputs/shape-files/states/States_shapefile.geojson
