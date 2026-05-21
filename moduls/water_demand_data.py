@@ -1,9 +1,12 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 import xarray as xr
 import pandas as pd
 import numpy as np
 import geopandas as gpd
 from shapely.geometry import Point
-import os
 from datetime import date
 from gdf_US import create_county_US
 

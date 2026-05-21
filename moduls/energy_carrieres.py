@@ -4,7 +4,10 @@ Date: 2025-12-07
 Author: Jara Späte
 '''
 
+import sys
 import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 import pandas as pd
 from state_mapping import mapping, get_state_mappings
 from gdf_US import create_county_US

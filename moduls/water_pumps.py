@@ -1,5 +1,8 @@
-import pandas as pd
+import sys
 import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import pandas as pd
 from state_mapping import mapping, get_state_mappings
 import json
 import numpy as np
@@ -17,7 +20,7 @@ PATH_IRRIGATION_AREA = '../intermediate_files/carriers/water/irrigation_irrigate
 PATH_WELL_DEPTH = '../intermediate_files/technologies/water_pumps/well_depth_gw.csv'
 
 # Load JSON file
-PARAMETER_RELATIV_PATH = 'parameters_conversion.json'
+PARAMETER_RELATIV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'parameters_conversion.json')
 with open(PARAMETER_RELATIV_PATH, 'r') as file:
     PARAMETERS_FORMULA = json.load(file)
 

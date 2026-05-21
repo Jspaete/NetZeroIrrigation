@@ -53,7 +53,7 @@ def create_county_US():
     # Read the geospatial dataset of European countries
 
     # Construct the path to the state shapefile
-    state_shapefile_path = '../data_inputs/shape-files/county/cb_2023_us_county_20m/cb_2023_us_county_20m.shp'
+    state_shapefile_path = os.path.join(os.path.dirname(__file__), '../data_inputs/shape-files/county/cb_2023_us_county_20m/cb_2023_us_county_20m.shp')
 
     # Read the shapefile
     us_counties = gpd.read_file(state_shapefile_path)

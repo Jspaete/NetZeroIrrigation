@@ -7,6 +7,10 @@ Author: Jara Späte
 - outputs are csv files with the nodes and edges defining the system
 '''
 
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from gdf_US import create_county_US
 import pandas as pd
 import geopandas as gpd

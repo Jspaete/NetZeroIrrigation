@@ -18,6 +18,9 @@ Example mappings:
 """
 
 import json
+import os
+
+_MAPPINGS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'state_mappings.json')
 
 
 def print_unmapped_states(df, column_name, column_name_mapped):
@@ -41,7 +44,7 @@ def get_state_mappings(mapping_direction):
     :return: Dictionary containing the state mappings
     :raises ValueError: If mapping_direction is not available
     """
-    with open('state_mappings.json', 'r') as file:
+    with open(_MAPPINGS_PATH, 'r') as file:
         state_mappings = json.load(file)
 
     available_mappings = ['full_to_abbr', 'full_to_number', 'number_to_abbr']
@@ -60,7 +63,7 @@ def mapping(df, column_name, mapping_direction):
     :return: DataFrame with mapped states
     :raises ValueError: If mapping_direction is not available
     """
-    with open('state_mappings.json', 'r') as file:
+    with open(_MAPPINGS_PATH, 'r') as file:
         state_mappings = json.load(file)
 
     available_mappings = ['full_to_abbr', 'full_to_number', 'number_to_abbr']
@@ -87,7 +90,7 @@ def reverse_mapping(df, column_in, column_out, mapping_direction):
     param mapping_direction: Direction of mapping (e.g., 'full_to_abbr')
     return: DataFrame with mapped states
     """
-    with open('state_mappings.json', 'r') as file:
+    with open(_MAPPINGS_PATH, 'r') as file:
         state_mappings = json.load(file)
 
     available_mappings = ['full_to_abbr', 'full_to_number', 'number_to_abbr']
