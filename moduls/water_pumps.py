@@ -11,13 +11,15 @@ from gdf_US import create_county_US
 ### FILE PATHS ###
 output_folder_el = '../final_outputs/carriers/electricity'
 output_folder_diesel = '../final_outputs/carriers/diesel'
-PATH_WATER_GW_SW_DRISCOLL = '../intermediate_files/carriers/water/water_gw_sw_driscoll_240918.csv'
+PATH_WATER_GW_SW_DRISCOLL = '../intermediate_files/carriers/water/water_gw_sw_driscoll.csv'
 PATH_NODES = '../final_outputs/energy_system/nodes_filtered_p75.csv'
-PATH_ENERGY_SOURCE = '../intermediate_files/technologies/water_pumps/energy_source_pumps_240918.csv'
-PATH_CONVERSION_DIESEL = '../final_outputs/technologies/conversion/diesel_WP/conversion_factor_240918.csv'
-PATH_CONVERSION_EL = '../final_outputs/technologies/conversion/el_WP/conversion_factor_240918.csv'
+PATH_ENERGY_SOURCE = '../intermediate_files/technologies/water_pumps/energy_source_pumps.csv'
+PATH_CONVERSION_DIESEL = '../final_outputs/technologies/conversion/diesel_WP/conversion_factor.csv'
+PATH_CONVERSION_EL = '../final_outputs/technologies/conversion/el_WP/conversion_factor.csv'
 PATH_IRRIGATION_AREA = '../intermediate_files/carriers/water/irrigation_irrigated_area_county.csv'
 PATH_WELL_DEPTH = '../intermediate_files/technologies/water_pumps/well_depth_gw.csv'
+PATH_HOURLY_WATER = '../intermediate_files/carriers/water/demand_hourly_water_month.csv'
+PATH_IRRIGATION_EFFICIENCY = '../final_outputs/technologies/conversion/irrigation_sys/conversion_factor_all_240921.csv'
 
 # Load JSON file
 PARAMETER_RELATIV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'parameters_conversion.json')
@@ -588,10 +590,10 @@ def process_capacity_existing_wp(df_hourly_water, df_energy_source, df_efficienc
 def filter_data():
     df_nodes = pd.read_csv(PATH_NODES)
     nodes_filtered = df_nodes['node'].tolist()
-    df_gw_sw_unfiltered = pd.read_csv('../intermediate_files/carriers/water/water_gw_sw_driscoll_240918.csv')
-    df_irr_unfiltered = pd.read_csv('../intermediate_files/carriers/water/irrigation_irrigated_area_county_240918.csv')
-    df_energy_source_unfiltered = pd.read_csv('../intermediate_files/technologies/water_pumps/energy_source_pumps_240918.csv')
-    df_groundwater_depth_unfiltered = pd.read_csv('../intermediate_files/technologies/water_pumps/well_depth_gw_240918.csv')
+    df_gw_sw_unfiltered = pd.read_csv(PATH_WATER_GW_SW_DRISCOLL)
+    df_irr_unfiltered = pd.read_csv(PATH_IRRIGATION_AREA)
+    df_energy_source_unfiltered = pd.read_csv(PATH_ENERGY_SOURCE)
+    df_groundwater_depth_unfiltered = pd.read_csv(PATH_WELL_DEPTH)
     # Filter the dataframes for the nodes in nodes_filtered
     df_gw_sw_filered = df_gw_sw_unfiltered[df_gw_sw_unfiltered['node'].isin(nodes_filtered)]
     df_irr_filtered = df_irr_unfiltered[df_irr_unfiltered['node'].isin(nodes_filtered)]
@@ -620,7 +622,7 @@ def main():
     df_energy_source.to_csv(os.path.join(save_path, filename), index=False)
 
     # Load the data from driscoll which was modified
-    df_driscoll_water = pd.read_csv('../intermediate_files/carriers/water/water_gw_sw_driscoll_240917.csv')
+    df_driscoll_water = pd.read_csv(PATH_WATER_GW_SW_DRISCOLL)
     # Calculate the percentage of surface and ground water
     df_driscoll_water['sw_percentage'] = df_driscoll_water['surface (m3)'] / df_driscoll_water['total (m3)']
     df_driscoll_water['gw_percentage'] = df_driscoll_water['ground (m3)'] / df_driscoll_water['total (m3)']
@@ -641,11 +643,11 @@ def main():
 
 
     ##### CALCULATE CONVERSION FACTORS FOR WATER PUMPS #####
-    df_irr = pd.read_csv('../intermediate_files/carriers/water/irrigation_irrigated_area_county_240918.csv')
+    df_irr = pd.read_csv(PATH_IRRIGATION_AREA)
     print(df_irr.columns)
-    df_groundwater = pd.read_csv('../intermediate_files/technologies/water_pumps/well_depth_gw_240918.csv')
+    df_groundwater = pd.read_csv(PATH_WELL_DEPTH)
     print(df_groundwater.columns)
-    df_gw_sw = pd.read_csv('../intermediate_files/carriers/water/water_gw_sw_driscoll_240918.csv')
+    df_gw_sw = pd.read_csv(PATH_WATER_GW_SW_DRISCOLL)
     print(df_gw_sw.columns)
     output_folder = '../final_outputs/carriers/water'
     # Read the CSV file
@@ -658,12 +660,12 @@ def main():
 
     ##### CAlLCULATE EXISTING CAPACITY OF WATER PUMPS #####
     # Load the data of the different energy sources
-    df_hourly_water = pd.read_csv('../intermediate_files/carriers/water/demand_hourly_water_month_240918.csv')
+    df_hourly_water = pd.read_csv(PATH_HOURLY_WATER)
 
-    # Load the hourly water demand for 0each month
-    df_energy_source = pd.read_csv('../intermediate_files/technologies/water_pumps/energy_source_pumps_240918.csv')
+    # Load the hourly water demand for each month
+    df_energy_source = pd.read_csv(PATH_ENERGY_SOURCE)
 
-    df_efficiency_irr_sys = pd.read_csv('../final_outputs/technologies/conversion/irrigation_sys/conversion_factor_all_240921.csv')
+    df_efficiency_irr_sys = pd.read_csv(PATH_IRRIGATION_EFFICIENCY)
     df_efficiency_irr_sys.rename(columns={'irrigation_water':'irr_sys_efficiency'}, inplace=True)
 
     # Process the capacity of the existing water pumps

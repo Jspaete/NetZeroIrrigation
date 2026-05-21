@@ -233,10 +233,7 @@ def calculate_hourly_demand(df_water):
     # Validate calculations
     validate_water_calculation(df_hourly_water)
 
-    today = date.today()
-    today_formated = today.strftime("%y%m%d")
-
-    path_hourly_water = f'../intermediate_files/carriers/water/demand_hourly_water_month_{today_formated}.csv'
+    path_hourly_water = f'../intermediate_files/carriers/water/demand_hourly_water_month.csv'
     df_hourly_final = df_hourly_water[['node',  'jan_hourly', 'feb_hourly', 'mar_hourly', 'apr_hourly', 'may_hourly', 'jun_hourly', 'jul_hourly', 'aug_hourly', 'sep_hourly', 'oct_hourly', 'nov_hourly', 'dec_hourly', 'unit']]
     df_hourly_final.to_csv(path_hourly_water, index=False)
     print(f"Data saved to {path_hourly_water}")
