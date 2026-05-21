@@ -206,7 +206,19 @@ def process_diesel_price(df_price_diesel, us_counties, nodes_filtered):
     df_import_min[['node', 'price_import']].to_csv(os.path.join(PATH_DIESEL_OUTPUT, filename_min), index=False)
     print(f"Data saved to {PATH_DIESEL_OUTPUT}")
 
-def main():
+def main(config: dict = None):
+    global PATH_EL_OUTPUT, PATH_DIESEL_OUTPUT, PATH_NODES
+    global PATH_DIESEL_PRICES, PATH_EL_PRICES, PATH_CARBON_INTENSITY
+    if config:
+        inp = config.get('paths', {}).get('input', {})
+        out = config.get('paths', {}).get('output', {})
+        if 'carriers_el_dir'  in out: PATH_EL_OUTPUT = out['carriers_el_dir']
+        if 'carriers_diesel_dir' in out: PATH_DIESEL_OUTPUT = out['carriers_diesel_dir']
+        if 'nodes_filtered_p75'  in out: PATH_NODES = out['nodes_filtered_p75']
+        if 'diesel_prices'       in inp: PATH_DIESEL_PRICES = inp['diesel_prices']
+        if 'el_prices'           in inp: PATH_EL_PRICES = inp['el_prices']
+        if 'carbon_intensity'    in inp: PATH_CARBON_INTENSITY = inp['carbon_intensity']
+
     us_counties = create_county_US()
     nodes_df = pd.read_csv(PATH_NODES)
     nodes_filtered = nodes_df['node'].tolist()

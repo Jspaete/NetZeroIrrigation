@@ -20,6 +20,13 @@ PATH_IRRIGATION_AREA = '../intermediate_files/carriers/water/irrigation_irrigate
 PATH_WELL_DEPTH = '../intermediate_files/technologies/water_pumps/well_depth_gw.csv'
 PATH_HOURLY_WATER = '../intermediate_files/carriers/water/demand_hourly_water_month.csv'
 PATH_IRRIGATION_EFFICIENCY = '../final_outputs/technologies/conversion/irrigation_sys/conversion_factor_all_240921.csv'
+PATH_PUMP_ENERGY_SOURCE = '../data_inputs/technologies/conversion/water_pump/number_pumps_us_states.xlsx'
+PATH_IRRIGATION_AREA_XLSX = '../data_inputs/technologies/conversion/water_pump/irrigation_irrigated_area_county.xlsx'
+PATH_GROUNDWATER_DIR = '../data_inputs/technologies/conversion/water_pump/USGWD-Tabular'
+PATH_EL_WP_DIR = '../final_outputs/technologies/conversion/el_WP'
+PATH_DIESEL_WP_DIR = '../final_outputs/technologies/conversion/diesel_WP'
+PATH_WP_CONVERSION_OUTPUT = '../final_outputs/technologies/conversion/'
+PATH_WP_INTERMEDIATE = '../intermediate_files/technologies/water_pumps'
 
 # Load JSON file
 PARAMETER_RELATIV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'parameters_conversion.json')
@@ -511,15 +518,11 @@ def merge_and_store_conversion_factors(df_irrigation, df_groundwater, df_gw_sw, 
     print(df_cf_high.head(1))
     print(df_cf_low.head(1))
 
-    # Generate a filename with the current date and save the conversion factor data
-    save_path = '../intermediate_files/technologies/water_pumps'
-
     filename = f'conversion_factor_pumps.csv'
-    df_conversion_factors.to_csv(os.path.join(save_path, filename), index=False)
+    df_conversion_factors.to_csv(os.path.join(PATH_WP_INTERMEDIATE, filename), index=False)
 
     # Store the conversion factors in the final output path
-    output_path = '../final_outputs/technologies/conversion/'
-    store_conversion_factors(df_conversion_factors, output_path)
+    store_conversion_factors(df_conversion_factors, PATH_WP_CONVERSION_OUTPUT)
     store_conversion_factors(df_cf_high, output_path, suffix='_high')
     store_conversion_factors(df_cf_low, output_path, suffix='_low')
     store_conversion_factors(df_cf_normal, output_path, suffix='_normal')
@@ -576,15 +579,11 @@ def process_capacity_existing_wp(df_hourly_water, df_energy_source, df_efficienc
     df_capacities_diesel.rename(columns={'capacity_diesel':'capacity_existing'}, inplace=True)
 
 
-    # Define the save path
-    save_path_diesel = '../final_outputs/technologies/conversion/diesel_WP'
-    save_path_electric = '../final_outputs/technologies/conversion/el_WP'
-
     filename = f'capacities_WP.csv'
 
     # Save the data to a csv file
-    df_capacities_el[['node', 'capacity_existing', 'unit', 'year_construction']].to_csv(os.path.join(save_path_electric, filename), index=False)
-    df_capacities_diesel[['node', 'capacity_existing', 'unit', 'year_construction']].to_csv(os.path.join(save_path_diesel, filename), index=False)
+    df_capacities_el[['node', 'capacity_existing', 'unit', 'year_construction']].to_csv(os.path.join(PATH_EL_WP_DIR, filename), index=False)
+    df_capacities_diesel[['node', 'capacity_existing', 'unit', 'year_construction']].to_csv(os.path.join(PATH_DIESEL_WP_DIR, filename), index=False)
 
 
 def filter_data():
@@ -607,19 +606,43 @@ def filter_data():
     df_energy_source_filtered.to_csv(f'../intermediate_files/technologies/water_pumps/energy_source_pumps_filtered_p75.csv', index=False)
     df_groundwater_depth_filtered.to_csv(f'../intermediate_files/technologies/water_pumps/well_depth_gw_filtered_p75.csv', index=False)
 
-def main():
+def main(config: dict = None):
+    global PATH_WATER_GW_SW_DRISCOLL, PATH_NODES, PATH_ENERGY_SOURCE
+    global PATH_CONVERSION_DIESEL, PATH_CONVERSION_EL
+    global PATH_IRRIGATION_AREA, PATH_WELL_DEPTH, PATH_HOURLY_WATER, PATH_IRRIGATION_EFFICIENCY
+    global PATH_PUMP_ENERGY_SOURCE, PATH_IRRIGATION_AREA_XLSX, PATH_GROUNDWATER_DIR
+    global PATH_EL_WP_DIR, PATH_DIESEL_WP_DIR, PATH_WP_CONVERSION_OUTPUT, PATH_WP_INTERMEDIATE
+    if config:
+        inp = config.get('paths', {}).get('input', {})
+        mid = config.get('paths', {}).get('intermediate', {})
+        out = config.get('paths', {}).get('output', {})
+        if 'water_gw_sw_driscoll'             in mid: PATH_WATER_GW_SW_DRISCOLL = mid['water_gw_sw_driscoll']
+        if 'nodes_filtered_p75'               in out: PATH_NODES = out['nodes_filtered_p75']
+        if 'energy_source_pumps'              in mid: PATH_ENERGY_SOURCE = mid['energy_source_pumps']
+        if 'el_wp_dir'                        in out:
+            PATH_EL_WP_DIR = out['el_wp_dir']
+            PATH_CONVERSION_EL = os.path.join(PATH_EL_WP_DIR, 'conversion_factor.csv')
+            PATH_WP_CONVERSION_OUTPUT = os.path.dirname(PATH_EL_WP_DIR)
+        if 'diesel_wp_dir'                    in out:
+            PATH_DIESEL_WP_DIR = out['diesel_wp_dir']
+            PATH_CONVERSION_DIESEL = os.path.join(PATH_DIESEL_WP_DIR, 'conversion_factor.csv')
+        if 'irrigation_area_county'           in mid: PATH_IRRIGATION_AREA = mid['irrigation_area_county']
+        if 'well_depth'                       in mid: PATH_WELL_DEPTH = mid['well_depth']
+        if 'hourly_water'                     in mid: PATH_HOURLY_WATER = mid['hourly_water']
+        if 'conversion_factor_irrigation_eff' in out: PATH_IRRIGATION_EFFICIENCY = out['conversion_factor_irrigation_eff']
+        if 'pump_energy_source'               in inp: PATH_PUMP_ENERGY_SOURCE = inp['pump_energy_source']
+        if 'irrigation_area_xlsx'             in inp: PATH_IRRIGATION_AREA_XLSX = inp['irrigation_area_xlsx']
+        if 'groundwater_dir'                  in inp: PATH_GROUNDWATER_DIR = inp['groundwater_dir']
+
     ##### PREPROCESSING DATA ON ENERGY SOURCES OF WATER PUMPS #####
     us_counties = create_county_US()
-    filename='number_pumps_us_states.xlsx'
-    file_path = '../data_inputs/technologies/conversion/water_pump'
-    data_df_pumps_mapped, data_df_pumps_percentage = get_data_on_pumps(file_path, filename)
+    pump_dir = os.path.dirname(PATH_PUMP_ENERGY_SOURCE)
+    pump_file = os.path.basename(PATH_PUMP_ENERGY_SOURCE)
+    data_df_pumps_mapped, data_df_pumps_percentage = get_data_on_pumps(pump_dir, pump_file)
     print(data_df_pumps_mapped.head())
     df_energy_source = pd.merge(data_df_pumps_mapped, us_counties[['STUSPS','node']], left_on='state', right_on='STUSPS', how='right')
 
-
-    filename = f'energy_source_pumps.csv'
-    save_path = '../intermediate_files/technologies/water_pumps'
-    df_energy_source.to_csv(os.path.join(save_path, filename), index=False)
+    df_energy_source.to_csv(PATH_ENERGY_SOURCE, index=False)
 
     # Load the data from driscoll which was modified
     df_driscoll_water = pd.read_csv(PATH_WATER_GW_SW_DRISCOLL)
@@ -628,15 +651,12 @@ def main():
     df_driscoll_water['gw_percentage'] = df_driscoll_water['ground (m3)'] / df_driscoll_water['total (m3)']
     print(df_driscoll_water.head(2))
 
-    filename='irrigation_irrigated_area_county.xlsx'
-    file_path = '../data_inputs/technologies/conversion/water_pump'
-    df_irr = pd.read_excel(os.path.join(file_path, filename),sheet_name='data')
+    df_irr = pd.read_excel(PATH_IRRIGATION_AREA_XLSX, sheet_name='data')
     df_irr_processed = process_irrigation_system_type_data(df_irr, us_counties)
 
     # Load the data from the files
-    path_groundwater = '../data_inputs/technologies/conversion/water_pump/USGWD-Tabular'
     n_states = 0
-    df_gw_depth, df_gw_depth_short = allocate_well_depth_to_state(path_groundwater, n_states)
+    df_gw_depth, df_gw_depth_short = allocate_well_depth_to_state(PATH_GROUNDWATER_DIR, n_states)
 
     #Fill the missing values, convert from feet to m and claculate it averge depth in bar for each county
     df_gw_county = clean_data_gw(df_gw_depth, us_counties)
@@ -649,11 +669,7 @@ def main():
     print(df_groundwater.columns)
     df_gw_sw = pd.read_csv(PATH_WATER_GW_SW_DRISCOLL)
     print(df_gw_sw.columns)
-    output_folder = '../final_outputs/carriers/water'
-    # Read the CSV file
-    filter_nodes_df = pd.read_csv('../final_outputs/energy_system/nodes_filtered_p75.csv')
-
-    # Extract the 'node' column and convert it into a list
+    filter_nodes_df = pd.read_csv(PATH_NODES)
     filter_nodes = filter_nodes_df['node'].tolist()
 
     merge_and_store_conversion_factors(df_irr, df_groundwater, df_gw_sw, filter_nodes)

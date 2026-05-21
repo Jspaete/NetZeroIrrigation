@@ -1,0 +1,66 @@
+# run_pipeline.toml — Central configuration for NetZeroIrrigation pipeline
+#
+# [run]   — set to true/false to control which steps execute
+# [paths] — all file paths in one place (relative to the moduls/ directory)
+#
+# Run the pipeline with:
+#   conda activate s2z_js
+#   python run_pipeline.py
+
+# ---------------------------------------------------------------------------
+# Step toggles
+# ---------------------------------------------------------------------------
+[run]
+create_system_parameters = true
+water_demand_data         = true
+water_pumps               = true
+energy_carrieres          = true
+prepare_PV_data           = true
+
+# ---------------------------------------------------------------------------
+# Input data paths
+# ---------------------------------------------------------------------------
+[paths.input]
+county_shapefile     = "../data_inputs/shape-files/county/cb_2023_us_county_20m/cb_2023_us_county_20m.shp"
+state_shapefile      = "../data_inputs/shape-files/states/States_shapefile.geojson"
+nc_irrigation        = "../data_inputs/carriers/water/cons_irr_2001_2010.nc"
+annual_water_data    = "../data_inputs/carriers/water/41467_2024_44920_MOESM4_ESM.xlsx"
+diesel_prices        = "../data_inputs/carriers/diesel/Weekly_On-Highway_Diesel_Fuel_Prices_20240720.csv"
+el_prices            = "../data_inputs/carriers/electricity/price_import_history_eia.csv"
+carbon_intensity     = "../data_inputs/carriers/electricity/statistic_id1133295_power-sector-carbon-intensity-in-the-us-2022-by-state.xlsx"
+irrigation_area_xlsx = "../data_inputs/technologies/conversion/water_pump/irrigation_irrigated_area_county.xlsx"
+groundwater_dir      = "../data_inputs/technologies/conversion/water_pump/USGWD-Tabular"
+pump_energy_source   = "../data_inputs/technologies/conversion/water_pump/number_pumps_us_states.xlsx"
+pv_county_dir        = "../data_inputs/technologies/conversion/PV/DPV by county"
+pv_plant_cf          = "../data_inputs/technologies/conversion/PV/solar_gen_cf_2022.csv"
+pv_plant_info        = "../data_inputs/technologies/conversion/PV/eia_solar_configs.csv"
+
+# ---------------------------------------------------------------------------
+# Intermediate file paths  (outputs of one step, inputs of another)
+# ---------------------------------------------------------------------------
+[paths.intermediate]
+water_month_rosa        = "../intermediate_files/carriers/water/demand_water_month_rosa.csv"
+water_month_rosa_filled = "../intermediate_files/carriers/water/demand_water_month_rosa_filled_missing_values.csv"
+water_gw_sw_driscoll    = "../intermediate_files/carriers/water/water_gw_sw_driscoll.csv"
+water_month_driscoll    = "../intermediate_files/carriers/water/demand_consumption_water_month_driscoll.csv"
+hourly_water            = "../intermediate_files/carriers/water/demand_hourly_water_month.csv"
+irrigation_area_county  = "../intermediate_files/carriers/water/irrigation_irrigated_area_county.csv"
+well_depth              = "../intermediate_files/technologies/water_pumps/well_depth_gw.csv"
+energy_source_pumps     = "../intermediate_files/technologies/water_pumps/energy_source_pumps.csv"
+
+# ---------------------------------------------------------------------------
+# Final output paths
+# ---------------------------------------------------------------------------
+[paths.output]
+set_nodes                        = "../final_outputs/energy_system/set_nodes.csv"
+set_edges                        = "../final_outputs/energy_system/set_edges.csv"
+nodes_filtered_p75               = "../final_outputs/energy_system/nodes_filtered_p75.csv"
+water_demand                     = "../final_outputs/carriers/water/demand.csv"
+carriers_el_dir                  = "../final_outputs/carriers/electricity"
+carriers_diesel_dir              = "../final_outputs/carriers/diesel"
+conversion_factor_irrigation_sys = "../final_outputs/technologies/conversion/irrigation_sys/conversion_factor_240919.csv"
+conversion_factor_irrigation_eff = "../final_outputs/technologies/conversion/irrigation_sys/conversion_factor_all_240921.csv"
+el_wp_dir                        = "../final_outputs/technologies/conversion/el_WP"
+diesel_wp_dir                    = "../final_outputs/technologies/conversion/diesel_WP"
+pv_cf_unfilled                   = "../final_outputs/technologies/conversion/PV/cf_solar_PV_unfilled.csv"
+pv_cf                            = "../final_outputs/technologies/conversion/PV/cf_solar_PV.csv"

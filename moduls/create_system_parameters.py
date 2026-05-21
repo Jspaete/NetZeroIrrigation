@@ -15,6 +15,9 @@ from gdf_US import create_county_US
 import pandas as pd
 import geopandas as gpd
 
+PATH_SET_NODES = '../final_outputs/energy_system/set_nodes.csv'
+PATH_SET_EDGES = '../final_outputs/energy_system/set_edges.csv'
+
 def create_edges(gdf):
     '''creating file with edges'''
     # Identify neighboring regions by checking for shared boundaries
@@ -40,8 +43,13 @@ def create_edges(gdf):
     return edges_df
 
 
-def main():
+def main(config: dict = None):
     '''main function to create system parameters'''
+    global PATH_SET_NODES, PATH_SET_EDGES
+    if config:
+        out = config.get('paths', {}).get('output', {})
+        if 'set_nodes' in out: PATH_SET_NODES = out['set_nodes']
+        if 'set_edges' in out: PATH_SET_EDGES = out['set_edges']
 
     ##### LOAD GIS DATA FOR US COUNTIES #####
     us_counties = create_county_US()
@@ -55,10 +63,10 @@ def main():
     #### CREATE NODES FILE #####
     df_nodes = us_counties[['node','lat', 'lon']]
     df_nodes = df_nodes.sort_values(by='node')
-    df_nodes.to_csv(f'../final_outputs/energy_system/set_nodes.csv', index=False)
+    df_nodes.to_csv(PATH_SET_NODES, index=False)
 
 
     #### CREATE EDGES FILE #####
     df_edges = create_edges(us_counties)
     df_edges = df_edges.sort_values(by='node_from')
-    df_edges.to_csv('../final_outputs/energy_system/set_edges.csv', index=False)
+    df_edges.to_csv(PATH_SET_EDGES, index=False)

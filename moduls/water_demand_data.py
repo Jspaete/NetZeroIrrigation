@@ -24,6 +24,7 @@ FILE_PATH_DEMAND_WATER_MONTH_ROSA = f'{INTERMEDIATE_PATH_WATER}/demand_water_mon
 FILE_PATH_DEMAND_WATER_MONTH_ROSA_FILLED = f'{INTERMEDIATE_PATH_WATER}/demand_water_month_rosa_filled_missing_values.csv'
 FILE_PATH_WATER_GW_SW_DRISCOLL = f'{INTERMEDIATE_PATH_WATER}/water_gw_sw_driscoll.csv'
 FILE_PATH_DEMAND_CONSUMPTION_WATER_MONTH_DRISCOLL = f'{INTERMEDIATE_PATH_WATER}/demand_consumption_water_month_driscoll.csv'
+FILE_PATH_HOURLY_WATER = f'{INTERMEDIATE_PATH_WATER}/demand_hourly_water_month.csv'
 FILE_PATH_FILTERED_NODES_P75 = '../final_outputs/energy_system/nodes_filtered_p75.csv'
 FILE_PATH_DEMAND = f'../final_outputs/carriers/water/demand.csv'
 
@@ -233,10 +234,9 @@ def calculate_hourly_demand(df_water):
     # Validate calculations
     validate_water_calculation(df_hourly_water)
 
-    path_hourly_water = f'../intermediate_files/carriers/water/demand_hourly_water_month.csv'
     df_hourly_final = df_hourly_water[['node',  'jan_hourly', 'feb_hourly', 'mar_hourly', 'apr_hourly', 'may_hourly', 'jun_hourly', 'jul_hourly', 'aug_hourly', 'sep_hourly', 'oct_hourly', 'nov_hourly', 'dec_hourly', 'unit']]
-    df_hourly_final.to_csv(path_hourly_water, index=False)
-    print(f"Data saved to {path_hourly_water}")
+    df_hourly_final.to_csv(FILE_PATH_HOURLY_WATER, index=False)
+    print(f"Data saved to {FILE_PATH_HOURLY_WATER}")
 
     return df_hourly_final
 
@@ -458,7 +458,28 @@ def create_demand_df(hourly_water_df, save_demand=True):
         print(f"Data saved to {FILE_PATH_DEMAND}")
     return demand_df
 
-def main():
+def main(config: dict = None):
+    global FILE_PATH_NC, FILE_PATH_EDGES, FILE_PATH_ANNUAL_WATER_DATA
+    global FILE_PATH_CONVERSION_FACTOR_IRRIGATION_SYS
+    global FILE_PATH_DEMAND_WATER_MONTH_ROSA, FILE_PATH_DEMAND_WATER_MONTH_ROSA_FILLED
+    global FILE_PATH_WATER_GW_SW_DRISCOLL, FILE_PATH_DEMAND_CONSUMPTION_WATER_MONTH_DRISCOLL
+    global FILE_PATH_HOURLY_WATER, FILE_PATH_FILTERED_NODES_P75, FILE_PATH_DEMAND
+    if config:
+        inp = config.get('paths', {}).get('input', {})
+        mid = config.get('paths', {}).get('intermediate', {})
+        out = config.get('paths', {}).get('output', {})
+        if 'nc_irrigation'                    in inp: FILE_PATH_NC = inp['nc_irrigation']
+        if 'annual_water_data'                in inp: FILE_PATH_ANNUAL_WATER_DATA = inp['annual_water_data']
+        if 'set_edges'                        in out: FILE_PATH_EDGES = out['set_edges']
+        if 'conversion_factor_irrigation_sys' in out: FILE_PATH_CONVERSION_FACTOR_IRRIGATION_SYS = out['conversion_factor_irrigation_sys']
+        if 'water_month_rosa'                 in mid: FILE_PATH_DEMAND_WATER_MONTH_ROSA = mid['water_month_rosa']
+        if 'water_month_rosa_filled'          in mid: FILE_PATH_DEMAND_WATER_MONTH_ROSA_FILLED = mid['water_month_rosa_filled']
+        if 'water_gw_sw_driscoll'             in mid: FILE_PATH_WATER_GW_SW_DRISCOLL = mid['water_gw_sw_driscoll']
+        if 'water_month_driscoll'             in mid: FILE_PATH_DEMAND_CONSUMPTION_WATER_MONTH_DRISCOLL = mid['water_month_driscoll']
+        if 'hourly_water'                     in mid: FILE_PATH_HOURLY_WATER = mid['hourly_water']
+        if 'nodes_filtered_p75'               in out: FILE_PATH_FILTERED_NODES_P75 = out['nodes_filtered_p75']
+        if 'water_demand'                     in out: FILE_PATH_DEMAND = out['water_demand']
+
     us_counties = create_county_US()
     #### Process monthly water data from NetCDF and allocate to counties ####
     process_monthly_water_data(us_counties)

@@ -9,6 +9,15 @@ from datetime import datetime
 from timezonefinder import TimezoneFinder
 from gdf_US import create_county_US
 
+### FILE PATHS ###
+PATH_NODES = '../final_outputs/energy_system/nodes_filtered_p75.csv'
+PATH_PV_PLANT_INFO = '../data_inputs/technologies/conversion/PV/eia_solar_configs.csv'
+PATH_PV_PLANT_CF = '../data_inputs/technologies/conversion/PV/solar_gen_cf_2022.csv'
+PATH_PV_COUNTY_DIR = '../data_inputs/technologies/conversion/PV/DPV by county'
+PATH_PV_CF_UNFILLED = '../final_outputs/technologies/conversion/PV/cf_solar_PV_unfilled.csv'
+PATH_PV_CF = '../final_outputs/technologies/conversion/PV/cf_solar_PV.csv'
+
+
 def calculate_monthly_hourly_mean(df_cf):
     """
     Calculate the mean capacity factor (CF) for each hour of each month.
@@ -263,36 +272,42 @@ def process_shifted_cf_plants(info_plants_df, cf_plants_df, us_counties, df_fina
 
     return shifted_cf_plants_WA_OR_mean2
 
-def main():
+def main(config: dict = None):
+    global PATH_NODES, PATH_PV_PLANT_INFO, PATH_PV_PLANT_CF
+    global PATH_PV_COUNTY_DIR, PATH_PV_CF_UNFILLED, PATH_PV_CF
+    if config:
+        inp = config.get('paths', {}).get('input', {})
+        out = config.get('paths', {}).get('output', {})
+        if 'nodes_filtered_p75' in out: PATH_NODES = out['nodes_filtered_p75']
+        if 'pv_plant_info'      in inp: PATH_PV_PLANT_INFO = inp['pv_plant_info']
+        if 'pv_plant_cf'        in inp: PATH_PV_PLANT_CF = inp['pv_plant_cf']
+        if 'pv_county_dir'      in inp: PATH_PV_COUNTY_DIR = inp['pv_county_dir']
+        if 'pv_cf_unfilled'     in out: PATH_PV_CF_UNFILLED = out['pv_cf_unfilled']
+        if 'pv_cf'              in out: PATH_PV_CF = out['pv_cf']
 
     # Load the nodes of which we conduct the analysis
-    nodes_df = pd.read_csv('../final_outputs/energy_system/nodes_filtered_p75.csv')
+    nodes_df = pd.read_csv(PATH_NODES)
     geoids_filtered = nodes_df['node'].tolist()
 
     # Load the data from the files for the missing values in the state OR and WA
-    info_plants_df = pd.read_csv('../data_inputs/technologies/conversion/PV/eia_solar_configs.csv')
-    cf_plants_df = pd.read_csv('../data_inputs/technologies/conversion/PV/solar_gen_cf_2022.csv')
+    info_plants_df = pd.read_csv(PATH_PV_PLANT_INFO)
+    cf_plants_df = pd.read_csv(PATH_PV_PLANT_CF)
 
     # Load US county geometries and add timezone-based time shift
     us_counties = create_county_US()
     us_counties = add_time_shift_to_gdf(us_counties)
 
-
     geoids_df = us_counties[us_counties['node'].isin(geoids_filtered)][['node', 'GEOID', 'time_shift_hours']]
-    path_dpv_data = '../data_inputs/technologies/conversion/PV/DPV by county'
 
     # Load and time-shift CF data for the selected GEOIDs
-    df_final_cfs, missing_geoids = load_shifted_cf_for_geoids(path_dpv_data, geoids_df)
+    df_final_cfs, missing_geoids = load_shifted_cf_for_geoids(PATH_PV_COUNTY_DIR, geoids_df)
 
     df_final_cfs2 = df_final_cfs.copy()
 
     # Calculate the monthly hourly mean
     df_cf_fill = calculate_monthly_hourly_mean(df_final_cfs2)
 
-
-    filename = f'cf_solar_PV_unfilled.csv'
-    save_path = '../final_outputs/technologies/conversion/PV'
-    df_cf_fill.to_csv(os.path.join(save_path,filename), index=False)
+    df_cf_fill.to_csv(PATH_PV_CF_UNFILLED, index=False)
 
     # Load the data from the files for the missing values in the state OR and WA
     shifted_cf_plants_WA_OR_mean2 = process_shifted_cf_plants(info_plants_df, cf_plants_df, us_counties, df_final_cfs[['Date','Hour']])
@@ -303,8 +318,4 @@ def main():
     # Fill missing GEOIDs with the mean of the state
     df_store, missing_state = fill_missing_geoids_with_state_mean(df_store, geoids_filtered, us_counties, shifted_cf_plants_WA_OR_mean2)
 
-
-    filename = f'cf_solar_PV.csv'
-    save_path = '../final_outputs/technologies/conversion/PV'
-
-    df_store.to_csv(os.path.join(save_path, filename), index=False)
+    df_store.to_csv(PATH_PV_CF, index=False)
