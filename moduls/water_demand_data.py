@@ -15,7 +15,7 @@ from gdf_US import create_county_US
 FILE_PATH_NC = '../data_inputs/carriers/water/cons_irr_2001_2010.nc'
 FILE_PATH_EDGES = '../final_outputs/energy_system/set_edges.csv'
 FILE_PATH_ANNUAL_WATER_DATA = '../data_inputs/carriers/water/41467_2024_44920_MOESM4_ESM.xlsx'
-FILE_PATH_CONVERSION_FACTOR_IRRIGATION_SYS = '../final_outputs/technologies/conversion/irrigation_sys/conversion_factor_240918.csv'
+FILE_PATH_CONVERSION_FACTOR_IRRIGATION_SYS = '../final_outputs/technologies/conversion/irrigation_sys/conversion_factor_240919.csv'
 
 
 ### FILE PATHS OUTPUT FILES ####
