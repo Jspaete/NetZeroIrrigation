@@ -82,7 +82,7 @@ def process_irrigation_system_type_data(df_irr, us_counties):
     )
 
     # Log file saving
-    print(f'Irrigation data saved to {save_path}')
+    print(f'Irrigation data saved to {PATH_IRRIGATION_AREA}')
 
     return df_merged
 

@@ -1,5 +1,9 @@
 import pandas as pd
+import numpy as np
 import os
+import pytz
+from datetime import datetime
+from timezonefinder import TimezoneFinder
 from gdf_US import create_county_US
 
 def calculate_monthly_hourly_mean(df_cf):
@@ -362,7 +366,8 @@ def main():
     info_plants_df = pd.read_csv('../data_inputs/technologies/conversion/PV/eia_solar_configs.csv')
     cf_plants_df = pd.read_csv('../data_inputs/technologies/conversion/PV/solar_gen_cf_2022.csv')
 
-    # Add the time shift to the GeoDataFrame
+    # Load US county geometries and add timezone-based time shift
+    us_counties = create_county_US()
     us_counties = add_time_shift_to_gdf(us_counties)
 
 
